@@ -10,7 +10,7 @@ const loginSchema = z.object({
 
 export async function POST(req) {
   await connectDB();
-
+  
   try {
     const body = await req.json();
     loginSchema.parse(body); 
