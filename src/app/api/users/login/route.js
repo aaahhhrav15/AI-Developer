@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { NextResponse } from 'next/server';
-import userModel from '@/models/userModel.js';
+import userModel from '@/models/userModel';
 import connectDB from '@/lib/db';
 
 const loginSchema = z.object({

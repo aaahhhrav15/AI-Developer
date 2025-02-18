@@ -7,8 +7,8 @@ const page = () => {
 
   const { user } = useContext(UserContext);
   return (
-    <div>{JSON.stringify(user)}</div>
+    <div>{user}</div>
   )
 }
 
-export default page;
+export default page
