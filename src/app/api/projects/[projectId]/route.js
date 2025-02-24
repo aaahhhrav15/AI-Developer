@@ -1,18 +1,36 @@
+import { NextResponse } from 'next/server';
 import { getProjectById } from '@/services/projectService';
 import { authMiddleware } from '@/middleware/authMiddleware';
+import dbConnect from '@/lib/db';
 
-export default async function handler(req, res) {
-    if (req.method !== 'GET') return res.status(405).end();
-
+export async function GET(req, context) {
     try {
-        const user = await authMiddleware(req, res);
-        if (!user) return;
+        await dbConnect();
 
-        const { projectId } = req.query;
+        console.log("Hello");
+
+        const user = await authMiddleware(req);
+        console.log("Hello1");
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const params = await context.params;
+        const projectId = params?.projectId; 
+        console.log("Hello2");
+        if (!projectId) {
+            return NextResponse.json({ error: "Project ID is required" }, { status: 400 });
+        }
+        console.log("Hello2.1");
         const project = await getProjectById({ projectId });
+        console.log("Hello3");
 
-        return res.status(200).json({ project });
+        if (!project) {
+            return NextResponse.json({ error: "Project not found" }, { status: 404 });
+        }
+
+        return NextResponse.json({ project }, { status: 200 });
     } catch (error) {
-        return res.status(400).json({ error: error.message });
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

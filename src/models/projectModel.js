@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-
+import User from './userModel';
 
 const projectSchema = new mongoose.Schema({
     name: {
@@ -13,7 +13,7 @@ const projectSchema = new mongoose.Schema({
     users: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'user'
+            ref: 'User'
         }
     ],
     fileTree: {

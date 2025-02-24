@@ -1,5 +1,6 @@
 import Project from '../models/projectModel';
 import mongoose from 'mongoose';
+import dbConnect from '../lib/db';
 
 export const createProject = async ({ name, userId }) => {
     if (!name || !userId) 
@@ -45,8 +46,10 @@ export const addUsersToProject = async ({ projectId, users, userId }) => {
 };
 
 export const getProjectById = async ({ projectId }) => {
+    await dbConnect();
     if (!mongoose.Types.ObjectId.isValid(projectId)) {
         throw new Error("Invalid projectId");
     }
+    console.log(Project.findById(projectId).populate('users'));
     return await Project.findById(projectId).populate('users');
 };
