@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import redisClient from "@/services/redisService";
+import redisClient from "@/services/redisService.js";
 
 export async function authMiddleware(req) {
     try {

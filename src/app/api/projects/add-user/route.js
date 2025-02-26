@@ -1,7 +1,7 @@
-import { addUsersToProject } from '@/services/projectService';
-import { authMiddleware } from '@/middleware/authMiddleware';
-import User from '@/models/userModel';
-import dbConnect from '@/lib/db';
+import { addUsersToProject } from '@/services/projectService.js';
+import { authMiddleware } from '@/middleware/authMiddleware.js';
+import User from '@/models/userModel.js';
+import dbConnect from '@/lib/db.js';
 import { NextResponse } from 'next/server';
 
 export async function PUT(req) {

@@ -1,6 +1,6 @@
-import Project from '../models/projectModel';
+import Project from '../models/projectModel.js';
 import mongoose from 'mongoose';
-import dbConnect from '../lib/db';
+import dbConnect from '../lib/db.js';
 
 export const createProject = async ({ name, userId }) => {
     if (!name || !userId) 

@@ -35,7 +35,7 @@
     "**/*.ts",
     "**/*.tsx",
     "src"
-  ],
+, "src/socketServer.js"  ],
   "exclude": [
     "node_modules"
   ]

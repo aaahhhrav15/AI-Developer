@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import userModel from '@/models/userModel';
-import { getAllUsers } from '@/services/userService';
-import { authMiddleware } from '@/middleware/authMiddleware';
-import connectDB from '@/lib/db';
+import userModel from '@/models/userModel.js';
+import { getAllUsers } from '@/services/userService.js';
+import { authMiddleware } from '@/middleware/authMiddleware.js';
+import connectDB from '@/lib/db.js';
 
 export async function GET(req) 
 {

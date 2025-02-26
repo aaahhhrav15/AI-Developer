@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import { createProject } from '@/services/projectService';
-import { authMiddleware } from '@/middleware/authMiddleware';
-import dbConnect from '@/lib/db';
-import User from '@/models/userModel';
+import { createProject } from '@/services/projectService.js';
+import { authMiddleware } from '@/middleware/authMiddleware.js';
+import dbConnect from '@/lib/db.js';
+import User from '@/models/userModel.js';
 
 export async function POST(req) {
     try {

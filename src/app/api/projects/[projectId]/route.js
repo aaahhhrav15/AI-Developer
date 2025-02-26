@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { getProjectById } from '@/services/projectService';
-import { authMiddleware } from '@/middleware/authMiddleware';
-import dbConnect from '@/lib/db';
+import { getProjectById } from '@/services/projectService.js';
+import { authMiddleware } from '@/middleware/authMiddleware.js';
+import dbConnect from '@/lib/db.js';
 
 export async function GET(req, context) {
     try {

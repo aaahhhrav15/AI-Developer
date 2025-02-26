@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import redisClient from '@/services/redisService';
+import redisClient from '@/services/redisService.js';
 import { authMiddleware } from '@/middleware/authMiddleware.js';
 
 export async function GET(req) {
