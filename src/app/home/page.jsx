@@ -1,43 +1,69 @@
-"use client"
-import React, { useContext, useState, useEffect } from 'react'
-import { UserContext } from '../context/user.context'
-import axios from "../config/axios"
-import { useNavigate } from 'react-router-dom'
+"use client";
+import React, { useContext, useState, useEffect } from 'react';
+import { UserContext } from '@/context/userContext'
+import axios from "axios";
+import { useRouter } from 'next/navigation';
 
 const Home = () => {
 
     const { user } = useContext(UserContext)
     const [ isModalOpen, setIsModalOpen ] = useState(false)
-    const [ projectName, setProjectName ] = useState(null)
+    const [ projectName, setProjectName ] = useState("")
     const [ project, setProject ] = useState([])
 
-    const navigate = useNavigate()
-
-    function createProject(e) {
-        e.preventDefault()
-        console.log({ projectName })
-
-        axios.post('/projects/create', {
-            name: projectName,
-        })
-            .then((res) => {
-                console.log(res)
-                setIsModalOpen(false)
-            })
-            .catch((error) => {
-                console.log(error)
-            })
-    }
+    const router = useRouter();
 
     useEffect(() => {
-        axios.get('/projects/all').then((res) => {
-            setProject(res.data.projects)
-
-        }).catch(err => {
-            console.log(err)
+        const token = user?.token || localStorage.getItem('token'); 
+    
+        if (!token) {
+            console.error("No token found!");
+            return;
+        }
+    
+        axios.get('/api/projects/all', {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            }
         })
-
-    }, [])
+        .then((res) => {
+            setProject(res.data.projects);
+        })
+        .catch(err => {
+            console.log(err);
+        });
+    }, []);
+    
+    function createProject(e) {
+        e.preventDefault();
+    
+        const token = user?.token || localStorage.getItem('token'); 
+    
+        if (!token) {
+            console.error("No token found!");
+            return;
+        }
+    
+        axios.post('/api/projects/create', 
+        {
+            name: projectName,
+        }, 
+        {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            }
+        })
+        .then((res) => {
+            console.log(res);
+            setIsModalOpen(false);
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+    }
+    
 
     return (
         <main className='p-4'>
@@ -53,7 +79,7 @@ const Home = () => {
                     project.map((project) => (
                         <div key={project._id}
                             onClick={() => {
-                                navigate(`/project`, {
+                                router.push(`/project`, {
                                     state: { project }
                                 })
                             }}
@@ -83,7 +109,7 @@ const Home = () => {
                                 <label className="block text-sm font-medium text-gray-700">Project Name</label>
                                 <input
                                     onChange={(e) => setProjectName(e.target.value)}
-                                    value={projectName}
+                                    value={projectName || ""}
                                     type="text" className="mt-1 block w-full p-2 border border-gray-300 rounded-md" required />
                             </div>
                             <div className="flex justify-end">
