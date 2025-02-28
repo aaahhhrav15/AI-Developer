@@ -19,15 +19,14 @@ io.use(async (socket, next) => {
 
   try {
       const token = socket.handshake.auth?.token || socket.handshake.headers.authorization?.split(' ')[ 1 ];
-      // const projectId = socket.handshake.query.projectId;
-      // console.log(projectId);
+      const projectId = socket.handshake.query.projectId;
+      console.log(projectId);
 
-      // if (!mongoose.Types.ObjectId.isValid(projectId)) {
-      //     return next(new Error('Invalid projectId'));
-      // }
+      if (!mongoose.Types.ObjectId.isValid(projectId)) {
+          return next(new Error('Invalid projectId'));
+      }
 
-
-      // socket.project = await Project.findById(projectId);
+      socket.project = await Project.findById(projectId);
 
 
       if (!token) {
@@ -52,7 +51,12 @@ io.use(async (socket, next) => {
 })
 
 io.on("connection", (socket) => {
-  console.log("🔥 A user connected!");
+  
+  console.log("A user connected!");
+
+  socket.on('project-message', async data => {
+    socket.broadcast.to(socket.roomId).emit('project-message', data)
+  });
 
   socket.on("event", (data) => {
     console.log("📩 Received event:", data);
