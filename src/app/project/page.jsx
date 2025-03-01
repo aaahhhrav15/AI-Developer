@@ -33,7 +33,7 @@ const page = () => {
     function addCollaborators() {
 
         axios.put("/api/projects/add-user", {
-            projectId: location.state.project._id,
+            projectId: project?._id,
             users: Array.from(selectedUserId)
         },{
             headers: {
@@ -41,8 +41,8 @@ const page = () => {
                 "Content-Type": "application/json"
         }}
         ).then(res => {
-            console.log(res.data)
-            setIsModalOpen(false)
+            console.log(res.data);
+            setIsModalOpen(false);
 
         }).catch(err => {
             console.log(err)
