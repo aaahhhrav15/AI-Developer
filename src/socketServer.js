@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import Project from './models/projectModel.js';
 import dotenv from 'dotenv';
+import connectDB from './lib/db.js';
 
 dotenv.config();
 
@@ -18,9 +19,10 @@ const io = new Server(httpServer, {
 io.use(async (socket, next) => {
 
   try {
+      await connectDB();
       const token = socket.handshake.auth?.token || socket.handshake.headers.authorization?.split(' ')[ 1 ];
       const projectId = socket.handshake.query.projectId;
-      console.log(projectId);
+      console.log("Project ",projectId);
 
       if (!mongoose.Types.ObjectId.isValid(projectId)) {
           return next(new Error('Invalid projectId'));
@@ -32,7 +34,6 @@ io.use(async (socket, next) => {
       if (!token) {
           return next(new Error('Authentication error'))
       }
-      console.log("Hello "+process.env.JWT_SECRET);
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       if (!decoded) {
@@ -53,6 +54,8 @@ io.use(async (socket, next) => {
 io.on("connection", (socket) => {
   
   console.log("A user connected!");
+
+  socket.join(socket.project._id.toString());
 
   socket.on('project-message', async data => {
     socket.broadcast.to(socket.roomId).emit('project-message', data)

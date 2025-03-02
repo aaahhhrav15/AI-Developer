@@ -4,7 +4,7 @@ let socketInstance = null;
 
 export const initializeSocket = (projectId) => {
 
-    socketInstance = socket(import.meta.env.URL, {
+    socketInstance = socket(process.env.NEXT_PUBLIC_SOCKET_URL, {
         auth: {
             token: localStorage.getItem('token')
         },
