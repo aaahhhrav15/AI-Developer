@@ -58,7 +58,7 @@ io.on("connection", (socket) => {
   socket.join(socket.project._id.toString());
 
   socket.on('project-message', async data => {
-    socket.broadcast.to(socket.roomId).emit('project-message', data)
+    socket.broadcast.to(socket.project._id.toString()).emit('project-message', data);
   });
 
   socket.on("event", (data) => {
@@ -67,6 +67,7 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("❌ A user disconnected!");
+    socket.leave(socket.project._id.toString());
   });
 });
 

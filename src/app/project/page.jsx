@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 import { initializeSocket, receiveMessage, sendMessage } from '@/config/socket';
 import axios from 'axios';
 import { UserContext } from '@/context/userContext';
@@ -15,11 +15,12 @@ const page = () => {
         }
         return null;
     });
-    console.log("Project ", project);
+    // console.log("Project ", project);
     const [selectedUserId, setSelectedUserId] = useState(new Set());
     const [users, setUsers] = useState([]);
     const [message, setMessage] = useState([]);
     const { user } = useContext(UserContext);
+    const messageBox = useRef(null);
 
     console.log("Selected User Id ", user);
 
@@ -58,51 +59,85 @@ const page = () => {
     }
 
     const send = () => {
+        if (!message) return;
         sendMessage("project-message", {
             message,
-            user: user._id
+            sender: user
         });
+        appendOutgoingMessage(message);
+        setMessage("");
     }
 
+    function appendIncomingMessage(messageObject) {
+        const messageBox = document.querySelector(".message-box");
+        
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("message", "p-2", "flex", "flex-col", "rounded-md", "bg-slate-200", "max-w-56");
+        messageElement.innerHTML = `
+            <small class="opacity-65 text-xs">${messageObject.sender.email}</small>
+            <p class="text-sm">${messageObject.message}</p>`
+        messageBox.appendChild(messageElement);
+        scrollToBottom();
+    }
 
+    function appendOutgoingMessage(messageObject) {
+        const messageBox = document.querySelector(".message-box");
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("ml-auto", "p-2", "flex", "flex-col", "rounded-md", "bg-slate-200", "max-w-56");
+        messageElement.innerHTML = `<small class="opacity-65 text-xs">${user.email}</small>
+        <p class="text-sm">${message}</p>`
+        messageBox.appendChild(messageElement);
+        scrollToBottom();
+    }
+        
 
     useEffect(() => {
-
-        initializeSocket(project._id);
-
-        receiveMessage("project-message", (data) => {
+        if (!project?._id || !user?.email) return; 
+    
+        const socket = initializeSocket(project._id);  
+    
+        const messageHandler = (data) => {
             console.log("Message ", data);
-        });
-
+            if (data?.sender?.email && data.sender.email !== user.email) { 
+                appendIncomingMessage(data);
+            }
+        };
+    
+        socket.on("project-message", messageHandler);
+    
         axios.get(`/api/projects/${project._id}`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
                 "Content-Type": "application/json"
             }
         }).then(res => {
-            console.log(res.data);
             setProject(res.data.project);
         }).catch(err => {
-            console.log(err);
+            console.error("Error fetching project:", err);
         });
-
-
+    
         axios.get("/api/users/all", {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
                 "Content-Type": "application/json"
             }
-        })
-            .then(res => {
-                setUsers(res.data.users);
-                console.log("Users ", res.data.users);
-            })
-            .catch(err => {
-                console.log(err);
-            });
-    }, []);
+        }).then(res => {
+            setUsers(res.data.users);
+        }).catch(err => {
+            console.error("Error fetching users:", err);
+        });
+    
+        return () => {
+            socket.off("project-message", messageHandler); 
+        };
+    
+    }, [project?._id, user?.email]); 
+    
+    
 
-
+    function scrollToBottom() {
+        messageBox.current.scrollTop = messageBox.current.scrollHeight;
+    }
 
     return (
         <UserAuth>
@@ -119,12 +154,17 @@ const page = () => {
                     </header>
 
                     <div className="conversation-area pt-14 pb-10 flex-grow flex flex-col h-full relative">
-                        <div className="message-box p-1 flex-grow flex flex-col gap-1 overflow-auto max-h-full scrollbar-hide">
+                        <div 
+                            ref={messageBox}
+                            className="message-box p-1 flex-grow flex flex-col gap-1 overflow-auto max-h-full scrollbar-hide">
                         </div>
                         <div className="inputField w-full flex absolute bottom-0">
                             <input
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") send();
+                                }}
                                 className='p-2 px-4 border-none outline-none flex-grow' type="text" placeholder='Enter message' />
                             <button onClick={send} className='px-5 bg-slate-950 text-white'><i className="ri-send-plane-fill"></i>
                             </button>
