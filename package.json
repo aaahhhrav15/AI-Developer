@@ -12,6 +12,7 @@
     "dev:all": "concurrently \"npm run dev\" \"npm run socket\""
   },
   "dependencies": {
+    "@google/generative-ai": "^0.23.0",
     "@radix-ui/react-label": "^2.1.2",
     "@tabler/icons-react": "^3.30.0",
     "axios": "^1.7.9",
