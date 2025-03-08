@@ -1,10 +1,26 @@
 "use client";
+import React from "react";
 import { useState, useEffect, useContext, useRef } from "react";
 import { initializeSocket, receiveMessage, sendMessage } from "@/config/socket";
 import axios from "axios";
 import { UserContext } from "@/context/userContext";
 import UserAuth from "@/auth/UserAuth";
 import Markdown from "markdown-to-jsx";
+import hljs from "highlight.js";
+
+function SyntaxHighlightedCode(props) {
+  const ref = useRef(null);
+
+  React.useEffect(() => {
+    if (ref.current && props.className?.includes("lang-") && window.hljs) {
+      window.hljs.highlightElement(ref.current);
+
+      ref.current.removeAttribute("data-highlighted");
+    }
+  }, [props.className, props.children]);
+
+  return <code {...props} ref={ref} />;
+}
 
 const page = () => {
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
@@ -60,25 +76,42 @@ const page = () => {
 
   const send = () => {
     if (!message) return;
-    
+
     const messageObj = {
       message: message,
       sender: user,
     };
-    
-    // Add to local state with isOutgoing flag for UI display
+
     const newMessage = {
       ...messageObj,
-      isOutgoing: true
+      isOutgoing: true,
     };
-    
-    // Send via socket
+
     sendMessage("project-message", messageObj);
-    
-    setMessages(prevMessages => [...prevMessages, newMessage]);
+
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
     setMessage("");
     scrollToBottom();
   };
+
+  function WriteAiMessage(message) {
+
+    const messageObject = JSON.parse(message)
+
+    return (
+        <div
+            className='overflow-auto bg-slate-950 text-white rounded-sm p-2'
+        >
+            <Markdown
+                children={messageObject.text}
+                options={{
+                    overrides: {
+                        code: SyntaxHighlightedCode,
+                    },
+                }}
+            />
+        </div>)
+    }
 
   useEffect(() => {
     if (!project?._id || !user?.email) return;
@@ -87,10 +120,12 @@ const page = () => {
 
     const messageHandler = (data) => {
       console.log("Message received:", data);
-      // Process all incoming messages from other senders
       if (data?.sender?._id && data.sender._id !== user._id) {
         console.log("Adding message to chat:", data);
-        setMessages(prevMessages => [...prevMessages, { ...data, isOutgoing: false }]);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { ...data, isOutgoing: false },
+        ]);
         scrollToBottom();
       }
     };
@@ -165,18 +200,18 @@ const page = () => {
               {messages.map((msg, index) => (
                 <div
                   key={index}
-                  className={`message p-2 flex flex-col rounded-md bg-slate-200 max-w-56 ${
-                    msg.isOutgoing ? "ml-auto" : ""
-                  }`}
+                  className={`${
+                    msg.sender._id === "ai" ? "max-w-80" : "max-w-52"
+                  } ${
+                    msg.sender._id == user._id.toString() && "ml-auto"
+                  }  message flex flex-col p-2 bg-slate-50 w-fit rounded-md`}
                 >
-                  <small className="opacity-65 text-xs">
+                  <small className="opacity-65 text-xs ml-1">
                     {msg.sender.email}
                   </small>
-                  {msg.sender._id === "ai" ? (
-                    <Markdown>{msg.message}</Markdown>
-                  ) : (
-                    <p className="text-sm">{msg.message}</p>
-                  )}
+                  {msg.sender._id === "ai" ? 
+                     WriteAiMessage(msg.message)
+                     : <p className="text-sm">{msg.message}</p>}
                 </div>
               ))}
             </div>
