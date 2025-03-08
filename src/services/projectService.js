@@ -50,6 +50,5 @@ export const getProjectById = async ({ projectId }) => {
     if (!mongoose.Types.ObjectId.isValid(projectId)) {
         throw new Error("Invalid projectId");
     }
-    console.log(Project.findById(projectId).populate('users'));
     return await Project.findById(projectId).populate('users');
 };

@@ -57,7 +57,7 @@ const Home = () => {
             }
         })
         .then((res) => {
-            console.log(res);
+            // console.log(res);
             setIsModalOpen(false);
         })
         .catch((error) => {

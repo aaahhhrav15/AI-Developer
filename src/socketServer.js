@@ -5,6 +5,8 @@ import jwt from 'jsonwebtoken';
 import Project from './models/projectModel.js';
 import dotenv from 'dotenv';
 import connectDB from './lib/db.js';
+import { send } from 'process';
+import { generateResult } from './services/aiService.js';
 
 dotenv.config();
 
@@ -58,7 +60,25 @@ io.on("connection", (socket) => {
   socket.join(socket.project._id.toString());
 
   socket.on('project-message', async data => {
-    socket.broadcast.to(socket.project._id.toString()).emit('project-message', data);
+    const message = data.message;
+    console.log("📩 Received message:", message);
+  
+    io.to(socket.project._id.toString()).emit('project-message', data);
+  
+    const aiIsPresent = message.includes("@ai");
+    if (aiIsPresent) 
+    {
+      const prompt = message.replace("@ai", "").trim();
+      const result = await generateResult(prompt);
+  
+      io.to(socket.project._id.toString()).emit('project-message', {
+        message: result,
+        sender: {
+          _id: "ai",
+          email:"AI",
+        }
+      });
+    }
   });
 
   socket.on("event", (data) => {

@@ -28,7 +28,7 @@ export default function AuthForm() {
       setIsLogin(true);
       router.push('/'); 
 
-      console.log('User Data:', data);
+      // console.log('User Data:', data);
       localStorage.setItem('token', data.token);
       setUser(data.user);
 

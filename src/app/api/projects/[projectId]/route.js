@@ -19,7 +19,7 @@ export async function GET(req, context) {
             return NextResponse.json({ error: "Project ID is required" }, { status: 400 });
         }
         const project = await getProjectById({ projectId });
-        console.log("Project ", project);   
+        // console.log("Project ", project);   
 
         if (!project) 
         {
